@@ -12,7 +12,7 @@ class room:
         self.current_people=self.current_people+x
         return self.current_people
     def check_exceed(self):
-        return ((self.current_people)>(self.limit_people))
+        return self.current_people>self.limit_people
     def show_room(self):
         print("current:{} limit:{}\n".format(self.current_people,self.limit_people))
         return 0
@@ -47,7 +47,7 @@ class Simulator:
         return 0
     def people(self,x,mood=None):
         if mood=='e':
-            return self.Rooms[x].check_exceed
+            return self.Rooms[x].check_exceed()
         return self.Rooms[x].people(mood)
 
 
