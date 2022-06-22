@@ -1,3 +1,8 @@
+import sys
+import os
+
+sys.path.append(os.pardir)
+from env import env
 import tensorflow as tf
 
 class pif_Model(tf.keras.Model):
