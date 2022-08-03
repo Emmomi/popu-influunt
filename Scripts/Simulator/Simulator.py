@@ -6,10 +6,10 @@ class room:
         self.limit_people=y
         return None
     def leave(self,x):
-        self.current_people=self.current_people-x
+        self.current_people-=x
         return self.current_people
     def enter(self,x):
-        self.current_people=self.current_people+x
+        self.current_people+=x
         return self.current_people
     def check_exceed(self):
         return self.current_people>self.limit_people
@@ -60,5 +60,5 @@ if __name__ == "__main__":
     Simu.Show()
     Simu.transfer(0,20,1)
     Simu.Show()
-    print(Simu.people(1,'e'))
+    print(Simu.people(1)[0])
     
