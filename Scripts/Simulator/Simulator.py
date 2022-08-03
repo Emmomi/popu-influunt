@@ -45,6 +45,8 @@ class Simulator:
             print("room {}".format(i+1))
             self.Rooms[i].show_room()
         return 0
+    def rooms(self):
+        return len(self.Rooms)
     def people(self,x,mood=None):
         if mood=='e':
             return self.Rooms[x].check_exceed()
@@ -59,3 +61,4 @@ if __name__ == "__main__":
     Simu.transfer(0,20,1)
     Simu.Show()
     print(Simu.people(1,'e'))
+    
