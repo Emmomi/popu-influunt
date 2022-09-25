@@ -6,9 +6,9 @@ import tensorflow as tf
 
 class popu:
     def __init__(self):
-        self.Simu=Simulator("../Simulator/rooms.json")
-        self.reward=0
-        self.flag=False
+        self.name = os.path.splitext(os.path.basename(__file__))[0]
+
+        self.reset()
     def get_state(self):
         state=tf.zeros(self.Simu.rooms(),3)
         for i in range(self.Simu.rooms()):
@@ -39,3 +39,5 @@ class popu:
         return self.get_state(),self.reward,self.flag
     def reset(self):
         self.flag=False
+        self.reward=0
+        self.Simu=Simulator("../Simulator/rooms.json")
