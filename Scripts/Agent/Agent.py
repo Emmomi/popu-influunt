@@ -23,6 +23,14 @@ from models import model as Mdl
 import tensorflow as tf
 import numpy as np
 
+f_log = './log'
+f_model = './models'
+
+model_filename = 'dqn_model.yaml'
+weights_filename = 'dqn_model_weights.hdf5'
+
+
+
 class DQNAgent:
     def __init__(self,env_name,rooms):
         self.env_name=env_name
