@@ -26,8 +26,14 @@ import numpy as np
 f_log = './log'
 f_model = './models'
 
-model_filename = 'dqn_model.yaml'
-weights_filename = 'dqn_model_weights.hdf5'
+From_model_filename = 'From_model.yaml'
+From_weights_filename = 'From_model_weights.hdf5'
+
+To_model_filename = 'To_model.yaml'
+To_weights_filename = 'To_model_weights.hdf5'
+
+People_model_filename = 'People_model.yaml'
+People_weights_filename = 'People_model_weights.hdf5'
 
 
 
@@ -85,19 +91,45 @@ class DQNAgent:
             y_minibatch.append(y_j)
         
         self.model.fit(np.array(state_minibatch), np.array(y_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
+        
     def load_model(self, model_path=None):
 
-        yaml_string = open(os.path.join(f_model, model_filename)).read()
-        self.model = model_from_yaml(yaml_string)
-        self.model.load_weights(os.path.join(f_model, weights_filename))
+        yaml_string = open(os.path.join(f_model, From_model_filename)).read()
+        self.From_model = model_from_yaml(yaml_string)
+        self.From_model.load_weights(os.path.join(f_model, From_weights_filename))
 
-        self.model.compile(loss='mean_squared_error',optimizer=RMSProp(lr=self.learning_rate),metrics=['accuracy'])
+        self.From_model.compile(loss='mean_squared_error',optimizer=RMSProp(lr=self.learning_rate),metrics=['accuracy'])
+        
+        yaml_string = open(os.path.join(f_model, To_model_filename)).read()
+        self.To_model = model_from_yaml(yaml_string)
+        self.To_model.load_weights(os.path.join(f_model, To_weights_filename))
+
+        self.To_model.compile(loss='mean_squared_error',optimizer=RMSProp(lr=self.learning_rate),metrics=['accuracy'])
+
+        yaml_string = open(os.path.join(f_model, People_model_filename)).read()
+        self.People_model = model_from_yaml(yaml_string)
+        self.People_model.load_weights(os.path.join(f_model, People_weights_filename))
+
+        self.People_model.compile(loss='mean_squared_error',optimizer=RMSProp(lr=self.learning_rate),metrics=['accuracy'])
+
 
     def save_model(self, num=None):
-        yaml_string = self.model.to_yaml()
-        model_name = 'dqn_model{0}.yaml'.format((str(num) if num else ''))
-        weight_name = 'dqn_model_weights{0}.hdf5'.format((str(num) if num else ''))
+        yaml_string = self.From_model.to_yaml()
+        model_name = 'From_model{0}.yaml'.format((str(num) if num else ''))
+        weight_name = 'From_model_weights{0}.hdf5'.format((str(num) if num else ''))
         open(os.path.join(f_model, model_name), 'w').write(yaml_string)
-        self.model.save_weights(os.path.join(f_model, weight_name))
+        self.From_model.save_weights(os.path.join(f_model, weight_name))
+
+        yaml_string = self.To_model.to_yaml()
+        model_name = 'To_model{0}.yaml'.format((str(num) if num else ''))
+        weight_name = 'To_model_weights{0}.hdf5'.format((str(num) if num else ''))
+        open(os.path.join(f_model, model_name), 'w').write(yaml_string)
+        self.To_model.save_weights(os.path.join(f_model, weight_name))
+
+        yaml_string = self.People_model.to_yaml()
+        model_name = 'People_model{0}.yaml'.format((str(num) if num else ''))
+        weight_name = 'People_model_weights{0}.hdf5'.format((str(num) if num else ''))
+        open(os.path.join(f_model, model_name), 'w').write(yaml_string)
+        self.People_model.save_weights(os.path.join(f_model, weight_name))
 
     
