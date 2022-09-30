@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:latest
+FROM tensorflow/tensorflow:1.15.5-gpu
 ARG USERNAME=popu-inf
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
