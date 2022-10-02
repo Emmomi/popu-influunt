@@ -77,7 +77,7 @@ class DQNAgent:
 
         for j in minibatch_indexes:
             state_j, action_j, reward_j, state_j_1, terminal = self.D[j]
-            action_j_index = self.enable_actions.index(action_j)
+            action_j_index = action_j
 
             y_j = self.Q_values(state_j)
 
@@ -90,7 +90,9 @@ class DQNAgent:
             state_minibatch.append(state_j)
             y_minibatch.append(y_j)
         
-        self.model.fit(np.array(state_minibatch), np.array(y_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
+        self.From_model.fit(np.array(state_minibatch), np.array(y_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
+        self.To_model.fit(np.array(state_minibatch), np.array(y_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
+        self.People_model.fit(np.array(state_minibatch), np.array(y_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
         
     def load_model(self, model_path=None):
 
