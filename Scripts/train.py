@@ -21,3 +21,8 @@ if __name__ == "__main__":
             action_t=agent.select_action(stte_t,agent.exploration)
             env.exe_action(action_t)
             state_t_1,reward_t,flag_t=env.observe()
+            agent.store_experience(state_t,action_t,reward_t,state_t_1,flag_t)
+            agent.experience_replay()
+
+
+    agent.save_model()
