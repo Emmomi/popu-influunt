@@ -10,11 +10,13 @@ class popu:
 
         self.reset()
     def get_state(self):
-        state=tf.zeros(self.Simu.rooms(),3)
+        state=tf.Variable(tf.zeros((self.Simu.rooms(),3),tf.int32))
         for i in range(self.Simu.rooms()):
-            state[i,0]=self.Simu.people(i,'c')
-            state[i,1]=self.Simu.people(i,'l')
-            state[i,2]=self.Simu.people(i,'e')
+            state=state[i,0].assign(self.Simu.people(i,'c'))
+            state=state[i,1].assign(self.Simu.people(i,'l'))
+            state=state[i,2].assign(self.Simu.people(i,'e'))
+
+        #print(state)
         return state
     def check_ex_rooms(self,simu):
         x=0
@@ -35,9 +37,9 @@ class popu:
         if ex_rooms_after==0:
             self.flag=True
             
-    def observe():
+    def observe(self):
         return self.get_state(),self.reward,self.flag
     def reset(self):
         self.flag=False
         self.reward=0
-        self.Simu=Simulator("../Simulator/rooms.json")
+        self.Simu=Simulator.Simulator('Scripts/Simulator/rooms.json')

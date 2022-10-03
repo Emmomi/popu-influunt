@@ -1,26 +1,28 @@
+from keras.models import Sequential
 from keras.layers.core import Dense, Flatten
 from keras.layers import Lambda, Input, Convolution2D
 from keras.models import model_from_yaml, Model
 import keras.callbacks
-from keras.optimizers import RMSprop
+from tensorflow.keras.optimizers import RMSprop
 try:
     from keras.optimizers import RMSpropGraves
 except:
     print('You do not have RMSpropGraves')
 
-import keras.backend.tensorflow_backend as KTF
+import keras.backend as KTF
 from keras import backend as K
 
 from collections import deque
 import os
 import sys
 import copy
-from util import clone_model
+##from util import clone_model
 
 sys.path.append(os.pardir)
 #from env import popu
 from models import model as Mdl
 import tensorflow as tf
+
 import numpy as np
 
 f_log = './log'
@@ -41,19 +43,19 @@ class DQNAgent:
     def __init__(self,env_name,rooms):
         self.env_name=env_name
         self.name = os.path.splitext(os.path.basename(__file__))[0]
-        self.episord=1000
+        self.episode=1000
         self.minibatch_size=32
         self.lerning_rate=0.001
         self.discount_factor=0.9
         self.exploration=0.1
         self.model_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-        self.model_name = "{}.ckpt".format(self.environment_name)
+        self.model_name = "{}.ckpt".format(self.env_name)
 
         self.D=deque(maxlen=self.episode)
 
-        self.From_model=Mdl.From_room_model(self.lerning_rate)
-        self.To_model=Mdl.To_room_model(self.lerning_rate)
-        self.People_model=Mdl.people_model(self.lerning_rate)
+        self.From_model=Mdl.From_room_model(self.lerning_rate,rooms)
+        self.To_model=Mdl.To_room_model(self.lerning_rate,rooms)
+        self.People_model=Mdl.people_model(self.lerning_rate,rooms)
 
         self.current_loss=0.0
     
@@ -69,7 +71,9 @@ class DQNAgent:
 
     def experience_replay(self):
         state_minibatch = []
-        y_minibatch = []
+        y_f_minibatch = []
+        y_t_minibatch = []
+        y_p_minibatch = []
 
         # sample random minibatch
         minibatch_size = min(len(self.D), self.minibatch_size)
@@ -79,20 +83,28 @@ class DQNAgent:
             state_j, action_j, reward_j, state_j_1, terminal = self.D[j]
             action_j_index = action_j
 
-            y_j = self.Q_values(state_j)
+            y_f_j = self.From_model.Q_values(state_j)
+            y_t_j = self.To_model.Q_values(state_j)
+            y_p_j = self.People_model.Q_values(state_j)
 
             if terminal:
-                y_j[action_j_index] = reward_j
+                y_f_j[action_j_index[0]] = reward_j
+                y_t_j[action_j_index[1]] = reward_j
+                y_p_j[action_j_index[2]] = reward_j
             else:
                 # reward_j + gamma * max_action' Q(state', action')
-                y_j[action_j_index] = reward_j + self.discount_factor * np.max(self.Q_values(state_j_1))  # NOQA
+                y_f_j[action_j_index[0]] = reward_j + self.discount_factor * np.max(self.From_model.Q_values(state_j_1))  # NOQA
+                y_t_j[action_j_index[1]] = reward_j + self.discount_factor * np.max(self.To_model.Q_values(state_j_1))  # NOQA
+                y_p_j[action_j_index[2]] = reward_j + self.discount_factor * np.max(self.People_model.Q_values(state_j_1))  # NOQA
 
             state_minibatch.append(state_j)
-            y_minibatch.append(y_j)
+            y_f_minibatch.append(y_f_j)
+            y_t_minibatch.append(y_t_j)
+            y_p_minibatch.append(y_p_j)
         
-        self.From_model.fit(np.array(state_minibatch), np.array(y_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
-        self.To_model.fit(np.array(state_minibatch), np.array(y_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
-        self.People_model.fit(np.array(state_minibatch), np.array(y_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
+        self.From_model.fit(np.array(state_minibatch), np.array(y_f_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
+        self.To_model.fit(np.array(state_minibatch), np.array(y_t_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
+        self.People_model.fit(np.array(state_minibatch), np.array(y_p_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
         
     def load_model(self, model_path=None):
 

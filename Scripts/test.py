@@ -1,5 +1,7 @@
-from Agent/Agent import DQNAgent
-from env/env import popu
+
+
+from Agent import Agent
+from env import env
 
 
 if __name__ == "__main__":
@@ -14,8 +16,8 @@ if __name__ == "__main__":
     flag_t=env.flag
     while not flag_t:
         state_t,reward_t,flag_t=env.observe()
-        action_t=agent.select_action(stte_t,agent.exploration)
-        env.exe_action(action_t)
+        action_t=agent.select_action(state_t,agent.exploration)
+        env.exe_action(action_t[0],action_t[1],action_t[2])
         
         print(action_t)
         print(env.observe())

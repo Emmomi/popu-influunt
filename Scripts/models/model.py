@@ -1,24 +1,24 @@
 import sys
 import os
-
+import numpy as np
 
 import tensorflow as tf
-
+from keras.models import Sequential
 from keras.layers.core import Dense, Flatten
-from keras.layers import Lambda, Input, Convolution2D
+from keras.layers import Lambda, Input, Convolution2D,InputLayer
 from keras.models import model_from_yaml, Model
 import keras.callbacks
-from keras.optimizers import RMSprop
+from tensorflow.keras.optimizers import RMSprop
 try:
     from keras.optimizers import RMSpropGraves
 except:
     print('You do not have RMSpropGraves')
 
-import keras.backend.tensorflow_backend as KTF
+import keras.backend as KTF
 from keras import backend as K
 
 class From_room_model:
-    def __init__(self,rate):
+    def __init__(self,rate,rooms):
         
         self.model = Sequential()
         self.model.add(InputLayer(input_shape=(rooms,3)))
@@ -28,14 +28,14 @@ class From_room_model:
 
         optimizer=RMSprop(lr=rate)
         self.model.compile(loss='mean_squared_error',optimizer=optimizer,metrics=['accuracy'])
-        return self.model
+        
 
     def Q_values(self, states):
         res = self.model.predict(np.array([states]))
         return res[0]
         
 class To_room_model:
-    def __init__(self,rate):
+    def __init__(self,rate,rooms):
 
         self.model = Sequential()
         self.model.add(InputLayer(input_shape=(rooms,3)))
@@ -45,14 +45,14 @@ class To_room_model:
 
         optimizer=RMSprop(lr=rate)
         self.model.compile(loss='mean_squared_error',optimizer=optimizer,metrics=['accuracy'])
-        return self.model
+        
 
     def Q_values(self, states):
         res = self.model.predict(np.array([states]))
         return res[0]
 
 class people_model:
-    def __init__(self,rate):
+    def __init__(self,rate,rooms):
 
         self.model = Sequential()
         self.model.add(InputLayer(input_shape=(rooms,3)))
@@ -62,7 +62,7 @@ class people_model:
 
         optimizer=RMSprop(lr=rate)
         self.model.compile(loss='mean_squared_error',optimizer=optimizer,metrics=['accuracy'])
-        return self.model
+        
 
     def Q_values(self, states):
         res = self.model.predict(np.array([states]))
