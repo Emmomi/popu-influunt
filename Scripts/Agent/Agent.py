@@ -1,6 +1,6 @@
 from keras.models import Sequential
 from keras.layers.core import Dense, Flatten
-from keras.layers import Lambda, Input, Convolution2D
+from keras.layers import Lambda, Input, Convolution2D,InputLayer
 from keras.models import model_from_yaml, Model
 import keras.callbacks
 from tensorflow.keras.optimizers import RMSprop
@@ -20,7 +20,7 @@ import copy
 
 sys.path.append(os.pardir)
 #from env import popu
-from models import model as Mdl
+#from models import model as Mdl
 import tensorflow as tf
 
 import numpy as np
@@ -47,25 +47,73 @@ class DQNAgent:
         self.minibatch_size=32
         self.lerning_rate=0.001
         self.discount_factor=0.9
-        self.exploration=0.1
+        self.exploration=0.5
         self.model_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
         self.model_name = "{}.ckpt".format(self.env_name)
 
         self.D=deque(maxlen=self.episode)
 
-        self.From_model=Mdl.From_room_model(self.lerning_rate,rooms)
-        self.To_model=Mdl.To_room_model(self.lerning_rate,rooms)
-        self.People_model=Mdl.people_model(self.lerning_rate,rooms)
+        self.init_From_model(self.lerning_rate,rooms)
+        self.init_To_model(self.lerning_rate,rooms)
+        self.init_People_model(self.lerning_rate,rooms)
 
         self.current_loss=0.0
     
+    def init_From_model(self,rate,rooms):
+        self.From_model = Sequential()
+        self.From_model.add(InputLayer(input_shape=(rooms,3)))
+        self.From_model.add(Flatten())
+        self.From_model.add(Dense((rooms*3)/2, activation='relu'))
+        self.From_model.add(Dense(rooms))
+        optimizer=RMSprop(lr=rate)
+        self.From_model.compile(optimizer='rmsprop',loss='mean_squared_error',metrics=['accuracy'])
+
+    def init_To_model(self,rate,rooms):
+        
+        self.To_model = Sequential()
+        self.To_model.add(InputLayer(input_shape=(rooms,3)))
+        self.To_model.add(Flatten())
+        self.To_model.add(Dense((rooms*3)/2, activation='relu'))
+        self.To_model.add(Dense(rooms))
+
+        optimizer=RMSprop(lr=rate)
+        self.To_model.compile(optimizer=optimizer,loss='mean_squared_error',metrics=['accuracy'])
+
+    def init_People_model(self,rate,rooms):
+        
+        self.People_model = Sequential()
+        self.People_model.add(InputLayer(input_shape=(rooms,3)))
+        self.People_model.add(Flatten())
+        self.People_model.add(Dense((rooms*3)/2, activation='relu'))
+        self.People_model.add(Dense(rooms))
+
+        optimizer=RMSprop(lr=rate)
+        self.People_model.compile(optimizer=optimizer,loss='mean_squared_error',metrics=['accuracy'])
+
+    def From_model_Q_values(self, states):
+        res = self.From_model.predict(np.array([states]))
+        return res[0]
+
+    def To_model_Q_values(self, states):
+        res = self.To_model.predict(np.array([states]))
+        return res[0]
+
+    def People_model_Q_values(self, states):
+        res = self.People_model.predict(np.array([states]))
+        return res[0]
+
     
+
     def select_action(self,state,ep):
-        if np.random.rand()<=ep:
-            return np.random.randint(len(state)),np.random.randint(len(state)),np.random.rand()  #移動元、移動先、人数の割合
+        a=np.random.rand()
+        print(a)
+        print(ep)
+        if a<=ep:
+            return np.random.randint(3),np.random.randint(3),np.random.randint(10,30)  #移動元、移動先、人数の割合
         else:
-            return np.argmax(self.From_model.Q_values(state)),np.argmax(self.To_model.Q_values(state)),np.argmax(self.People_model.Q_values(state))
-    
+            #return np.argmax(self.From_model_Q_values(state)),np.argmax(self.To_model_Q_values(state)),np.argmax(self.People_model_Q_values(state))
+            return np.argmax(self.From_model_Q_values(state)),np.argmax(self.To_model_Q_values(state)),10
+                
     def store_experience(self, state, action, reward, state_1, flag):
         self.D.append((state, action, reward, state_1, flag))
 
@@ -83,28 +131,31 @@ class DQNAgent:
             state_j, action_j, reward_j, state_j_1, terminal = self.D[j]
             action_j_index = action_j
 
-            y_f_j = self.From_model.Q_values(state_j)
-            y_t_j = self.To_model.Q_values(state_j)
-            y_p_j = self.People_model.Q_values(state_j)
+            y_f_j = self.From_model_Q_values(state_j)
+            y_t_j = self.To_model_Q_values(state_j)
+            y_p_j = self.People_model_Q_values(state_j)
 
             if terminal:
                 y_f_j[action_j_index[0]] = reward_j
                 y_t_j[action_j_index[1]] = reward_j
-                y_p_j[action_j_index[2]] = reward_j
+                y_p_j[0] = reward_j
             else:
                 # reward_j + gamma * max_action' Q(state', action')
-                y_f_j[action_j_index[0]] = reward_j + self.discount_factor * np.max(self.From_model.Q_values(state_j_1))  # NOQA
-                y_t_j[action_j_index[1]] = reward_j + self.discount_factor * np.max(self.To_model.Q_values(state_j_1))  # NOQA
-                y_p_j[action_j_index[2]] = reward_j + self.discount_factor * np.max(self.People_model.Q_values(state_j_1))  # NOQA
+                print("reward:{}   des:{}   f:{}  t:{}  p:{}".format(reward_j,self.discount_factor,np.max(self.From_model_Q_values(state_j_1)),np.max(self.To_model_Q_values(state_j_1)) ,np.max(self.People_model_Q_values(state_j_1)) ))
+                y_f_j[action_j_index[0]] = reward_j + self.discount_factor * np.max(self.From_model_Q_values(state_j_1))  # NOQA
+                y_t_j[action_j_index[1]] = reward_j + self.discount_factor * np.max(self.To_model_Q_values(state_j_1))  # NOQA
+                y_p_j[1] = reward_j + self.discount_factor * np.max(self.People_model_Q_values(state_j_1))  # NOQA
 
             state_minibatch.append(state_j)
             y_f_minibatch.append(y_f_j)
             y_t_minibatch.append(y_t_j)
             y_p_minibatch.append(y_p_j)
+
+        print(type(self.From_model))
         
-        self.From_model.fit(np.array(state_minibatch), np.array(y_f_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
-        self.To_model.fit(np.array(state_minibatch), np.array(y_t_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
-        self.People_model.fit(np.array(state_minibatch), np.array(y_p_minibatch), batch_size=minibatch_size,nb_epoch=1,verbose=0)
+        self.From_model.fit(np.array(state_minibatch), np.array(y_f_minibatch),epochs=1, batch_size=minibatch_size,verbose=0)
+        self.To_model.fit(np.array(state_minibatch), np.array(y_t_minibatch),epochs=1, batch_size=minibatch_size,verbose=0)
+        self.People_model.fit(np.array(state_minibatch), np.array(y_p_minibatch),epochs=1, batch_size=minibatch_size,verbose=0)
         
     def load_model(self, model_path=None):
 

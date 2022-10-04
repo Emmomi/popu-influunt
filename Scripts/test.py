@@ -6,9 +6,9 @@ from env import env
 
 if __name__ == "__main__":
 
-    env=popu()
+    env=env.popu()
     rooms=len(env.get_state())
-    agent=DQNAgent(env.name,rooms)
+    agent=Agent.DQNAgent(env.name,rooms)
     agent.load_model()
 
     

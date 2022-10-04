@@ -19,16 +19,14 @@ from keras import backend as K
 
 class From_room_model:
     def __init__(self,rate,rooms):
-        
         self.model = Sequential()
         self.model.add(InputLayer(input_shape=(rooms,3)))
         self.model.add(Flatten())
         self.model.add(Dense((rooms*3)/2, activation='relu'))
         self.model.add(Dense(rooms))
-
         optimizer=RMSprop(lr=rate)
-        self.model.compile(loss='mean_squared_error',optimizer=optimizer,metrics=['accuracy'])
-        
+        self.model.compile(optimizer='rmsprop',loss='mean_squared_error',metrics=['accuracy'])
+        print(type(self.model))
 
     def Q_values(self, states):
         res = self.model.predict(np.array([states]))
@@ -36,7 +34,7 @@ class From_room_model:
         
 class To_room_model:
     def __init__(self,rate,rooms):
-
+        
         self.model = Sequential()
         self.model.add(InputLayer(input_shape=(rooms,3)))
         self.model.add(Flatten())
@@ -44,7 +42,7 @@ class To_room_model:
         self.model.add(Dense(rooms))
 
         optimizer=RMSprop(lr=rate)
-        self.model.compile(loss='mean_squared_error',optimizer=optimizer,metrics=['accuracy'])
+        self.model.compile(optimizer=optimizer,loss='mean_squared_error',metrics=['accuracy'])
         
 
     def Q_values(self, states):
@@ -53,7 +51,7 @@ class To_room_model:
 
 class people_model:
     def __init__(self,rate,rooms):
-
+        
         self.model = Sequential()
         self.model.add(InputLayer(input_shape=(rooms,3)))
         self.model.add(Flatten())
@@ -61,7 +59,7 @@ class people_model:
         self.model.add(Dense(rooms))
 
         optimizer=RMSprop(lr=rate)
-        self.model.compile(loss='mean_squared_error',optimizer=optimizer,metrics=['accuracy'])
+        self.model.compile(optimizer=optimizer,loss='mean_squared_error',metrics=['accuracy'])
         
 
     def Q_values(self, states):
