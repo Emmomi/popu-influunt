@@ -30,11 +30,11 @@ class popu:
         ex_rooms_after=self.check_ex_rooms(self.Simu)
         
         if ex_rooms_after<ex_rooms_befor:
-            self.reward=1
+            self.reward=5
         else:
             self.reward=-1
         
-        if ex_rooms_after==0:
+        if ex_rooms_after==0 or self.Simu.people(x_r,'c')<0:
             self.flag=True
             
     def observe(self):
