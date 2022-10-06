@@ -25,16 +25,16 @@ import tensorflow as tf
 
 import numpy as np
 
-f_log = './log'
-f_model = './models'
+f_log = 'Scripts/log'
+f_model = 'Scripts/models'
 
-From_model_filename = 'From_model.yaml'
+From_model_filename = 'From_model.json'
 From_weights_filename = 'From_model_weights.hdf5'
 
-To_model_filename = 'To_model.yaml'
+To_model_filename = 'To_model.json'
 To_weights_filename = 'To_model_weights.hdf5'
 
-People_model_filename = 'People_model.yaml'
+People_model_filename = 'People_model.json'
 People_weights_filename = 'People_model_weights.hdf5'
 
 
@@ -106,8 +106,8 @@ class DQNAgent:
 
     def select_action(self,state,ep):
         a=np.random.rand()
-        print(a)
-        print(ep)
+        #print(a)
+        #print(ep)
         if a<=ep:
             return np.random.randint(3),np.random.randint(3),np.random.randint(10,30)  #移動元、移動先、人数の割合
         else:
@@ -141,7 +141,7 @@ class DQNAgent:
                 y_p_j[0] = reward_j
             else:
                 # reward_j + gamma * max_action' Q(state', action')
-                print("reward:{}   des:{}   f:{}  t:{}  p:{}".format(reward_j,self.discount_factor,np.max(self.From_model_Q_values(state_j_1)),np.max(self.To_model_Q_values(state_j_1)) ,np.max(self.People_model_Q_values(state_j_1)) ))
+                #print("reward:{}   des:{}   f:{}  t:{}  p:{}".format(reward_j,self.discount_factor,np.max(self.From_model_Q_values(state_j_1)),np.max(self.To_model_Q_values(state_j_1)) ,np.max(self.People_model_Q_values(state_j_1)) ))
                 y_f_j[action_j_index[0]] = reward_j + self.discount_factor * np.max(self.From_model_Q_values(state_j_1))  # NOQA
                 y_t_j[action_j_index[1]] = reward_j + self.discount_factor * np.max(self.To_model_Q_values(state_j_1))  # NOQA
                 y_p_j[1] = reward_j + self.discount_factor * np.max(self.People_model_Q_values(state_j_1))  # NOQA
@@ -151,7 +151,7 @@ class DQNAgent:
             y_t_minibatch.append(y_t_j)
             y_p_minibatch.append(y_p_j)
 
-        print(type(self.From_model))
+        #print(type(self.From_model))
         
         self.From_model.fit(np.array(state_minibatch), np.array(y_f_minibatch),epochs=1, batch_size=minibatch_size,verbose=0)
         self.To_model.fit(np.array(state_minibatch), np.array(y_t_minibatch),epochs=1, batch_size=minibatch_size,verbose=0)
@@ -159,42 +159,42 @@ class DQNAgent:
         
     def load_model(self, model_path=None):
 
-        yaml_string = open(os.path.join(f_model, From_model_filename)).read()
-        self.From_model = model_from_yaml(yaml_string)
+        json_string = open(os.path.join(f_model, From_model_filename)).read()
+        self.From_model = tf.keras.models.model_from_json(json_string)
         self.From_model.load_weights(os.path.join(f_model, From_weights_filename))
 
-        self.From_model.compile(loss='mean_squared_error',optimizer=RMSProp(lr=self.learning_rate),metrics=['accuracy'])
+        self.From_model.compile(optimizer='rmsprop',loss='mean_squared_error',metrics=['accuracy'])
         
-        yaml_string = open(os.path.join(f_model, To_model_filename)).read()
-        self.To_model = model_from_yaml(yaml_string)
+        json_string = open(os.path.join(f_model, To_model_filename)).read()
+        self.To_model = tf.keras.models.model_from_json(json_string)
         self.To_model.load_weights(os.path.join(f_model, To_weights_filename))
 
-        self.To_model.compile(loss='mean_squared_error',optimizer=RMSProp(lr=self.learning_rate),metrics=['accuracy'])
+        self.To_model.compile(optimizer='rmsprop',loss='mean_squared_error',metrics=['accuracy'])
 
-        yaml_string = open(os.path.join(f_model, People_model_filename)).read()
-        self.People_model = model_from_yaml(yaml_string)
+        json_string = open(os.path.join(f_model, People_model_filename)).read()
+        self.People_model = tf.keras.models.model_from_json(json_string)
         self.People_model.load_weights(os.path.join(f_model, People_weights_filename))
 
-        self.People_model.compile(loss='mean_squared_error',optimizer=RMSProp(lr=self.learning_rate),metrics=['accuracy'])
+        self.People_model.compile(optimizer='rmsprop',loss='mean_squared_error',metrics=['accuracy'])
 
 
     def save_model(self, num=None):
-        yaml_string = self.From_model.to_yaml()
-        model_name = 'From_model{0}.yaml'.format((str(num) if num else ''))
+        json_string = self.From_model.to_json()
+        model_name = 'From_model{0}.json'.format((str(num) if num else ''))
         weight_name = 'From_model_weights{0}.hdf5'.format((str(num) if num else ''))
-        open(os.path.join(f_model, model_name), 'w').write(yaml_string)
+        open(os.path.join(f_model, model_name), 'w').write(json_string)
         self.From_model.save_weights(os.path.join(f_model, weight_name))
 
-        yaml_string = self.To_model.to_yaml()
-        model_name = 'To_model{0}.yaml'.format((str(num) if num else ''))
+        json_string = self.To_model.to_json()
+        model_name = 'To_model{0}.json'.format((str(num) if num else ''))
         weight_name = 'To_model_weights{0}.hdf5'.format((str(num) if num else ''))
-        open(os.path.join(f_model, model_name), 'w').write(yaml_string)
+        open(os.path.join(f_model, model_name), 'w').write(json_string)
         self.To_model.save_weights(os.path.join(f_model, weight_name))
 
-        yaml_string = self.People_model.to_yaml()
-        model_name = 'People_model{0}.yaml'.format((str(num) if num else ''))
+        json_string = self.People_model.to_json()
+        model_name = 'People_model{0}.json'.format((str(num) if num else ''))
         weight_name = 'People_model_weights{0}.hdf5'.format((str(num) if num else ''))
-        open(os.path.join(f_model, model_name), 'w').write(yaml_string)
+        open(os.path.join(f_model, model_name), 'w').write(json_string)
         self.People_model.save_weights(os.path.join(f_model, weight_name))
 
     

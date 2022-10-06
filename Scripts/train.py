@@ -33,7 +33,7 @@ if __name__ == "__main__":
             i+=1
             if i>15:
                 break
-            e+=1
+        e+=1
 
 
     agent.save_model()

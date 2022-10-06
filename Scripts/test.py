@@ -7,7 +7,7 @@ from env import env
 if __name__ == "__main__":
 
     env=env.popu()
-    rooms=len(env.get_state())
+    rooms=3
     agent=Agent.DQNAgent(env.name,rooms)
     agent.load_model()
 
