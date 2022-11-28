@@ -47,9 +47,10 @@ class DQNAgent:
         self.minibatch_size=32
         self.lerning_rate=0.001
         self.discount_factor=0.9
-        self.exploration=0.5
+        self.exploration=0.2
         self.model_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
         self.model_name = "{}.ckpt".format(self.env_name)
+        
 
         self.D=deque(maxlen=self.episode)
 
@@ -85,7 +86,7 @@ class DQNAgent:
         self.People_model.add(InputLayer(input_shape=(rooms,3)))
         self.People_model.add(Flatten())
         self.People_model.add(Dense((rooms*3)/2, activation='relu'))
-        self.People_model.add(Dense(rooms))
+        self.People_model.add(Dense(10))
 
         optimizer=RMSprop(lr=rate)
         self.People_model.compile(optimizer=optimizer,loss='mean_squared_error',metrics=['accuracy'])
@@ -109,10 +110,10 @@ class DQNAgent:
         #print(a)
         #print(ep)
         if a<=ep:
-            return np.random.randint(3),np.random.randint(3),np.random.randint(10,30)  #移動元、移動先、人数の割合
+            return np.random.randint(3),np.random.randint(3),np.random.randint(1,10)  #移動元、移動先、人数の割合
         else:
-            #return np.argmax(self.From_model_Q_values(state)),np.argmax(self.To_model_Q_values(state)),np.argmax(self.People_model_Q_values(state))
-            return np.argmax(self.From_model_Q_values(state)),np.argmax(self.To_model_Q_values(state)),10
+            return np.argmax(self.From_model_Q_values(state)),np.argmax(self.To_model_Q_values(state)),np.argmax(self.People_model_Q_values(state))
+            #return np.argmax(self.From_model_Q_values(state)),np.argmax(self.To_model_Q_values(state)),10
                 
     def store_experience(self, state, action, reward, state_1, flag):
         self.D.append((state, action, reward, state_1, flag))
@@ -138,13 +139,13 @@ class DQNAgent:
             if terminal:
                 y_f_j[action_j_index[0]] = reward_j
                 y_t_j[action_j_index[1]] = reward_j
-                y_p_j[0] = reward_j
+                y_p_j[action_j_index[2]] = reward_j
             else:
                 # reward_j + gamma * max_action' Q(state', action')
-                #print("reward:{}   des:{}   f:{}  t:{}  p:{}".format(reward_j,self.discount_factor,np.max(self.From_model_Q_values(state_j_1)),np.max(self.To_model_Q_values(state_j_1)) ,np.max(self.People_model_Q_values(state_j_1)) ))
+                print("reward:{}   des:{}   f:{}  t:{}  p:{}".format(reward_j,self.discount_factor,np.max(self.From_model_Q_values(state_j_1)),np.max(self.To_model_Q_values(state_j_1)) ,np.max(self.People_model_Q_values(state_j_1)) ))
                 y_f_j[action_j_index[0]] = reward_j + self.discount_factor * np.max(self.From_model_Q_values(state_j_1))  # NOQA
                 y_t_j[action_j_index[1]] = reward_j + self.discount_factor * np.max(self.To_model_Q_values(state_j_1))  # NOQA
-                y_p_j[1] = reward_j + self.discount_factor * np.max(self.People_model_Q_values(state_j_1))  # NOQA
+                y_p_j[action_j_index[2]] = reward_j + self.discount_factor * np.max(self.People_model_Q_values(state_j_1))  # NOQA
 
             state_minibatch.append(state_j)
             y_f_minibatch.append(y_f_j)
