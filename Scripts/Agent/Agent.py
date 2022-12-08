@@ -25,7 +25,7 @@ import tensorflow as tf
 
 import numpy as np
 
-f_log = 'Scripts/log'
+f_log = 'Scripts/logs'
 f_model = 'Scripts/models'
 
 From_model_filename = 'From_model.json'
@@ -153,10 +153,13 @@ class DQNAgent:
             y_p_minibatch.append(y_p_j)
 
         #print(type(self.From_model))
+        callbacks_From=tf.keras.callbacks.TensorBoard(log_dir=f_log)
+        callbacks_To=tf.keras.callbacks.TensorBoard(log_dir=f_log)
+        callbacks_People=tf.keras.callbacks.TensorBoard(log_dir=f_log)
         
-        self.From_model.fit(np.array(state_minibatch), np.array(y_f_minibatch),epochs=1, batch_size=minibatch_size,verbose=0)
-        self.To_model.fit(np.array(state_minibatch), np.array(y_t_minibatch),epochs=1, batch_size=minibatch_size,verbose=0)
-        self.People_model.fit(np.array(state_minibatch), np.array(y_p_minibatch),epochs=1, batch_size=minibatch_size,verbose=0)
+        self.From_model.fit(np.array(state_minibatch), np.array(y_f_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=callbacks_From)
+        self.To_model.fit(np.array(state_minibatch), np.array(y_t_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=callbacks_To)
+        self.People_model.fit(np.array(state_minibatch), np.array(y_p_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=callbacks_People)
         
     def load_model(self, model_path=None):
 
