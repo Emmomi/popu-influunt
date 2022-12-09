@@ -67,7 +67,7 @@ class DQNAgent:
         self.From_model.add(Dense((rooms*3)/2, activation='relu'))
         self.From_model.add(Dense(rooms))
         optimizer=RMSprop(lr=rate)
-        self.From_model.compile(optimizer='rmsprop',loss='mean_squared_error',metrics=['accuracy'])
+        self.From_model.compile(optimizer=optimizer,loss='mean_squared_error',metrics=['accuracy'])
 
     def init_To_model(self,rate,rooms):
         
@@ -178,6 +178,7 @@ class DQNAgent:
 
         self.People_model.compile(optimizer='rmsprop',loss='mean_squared_error',metrics=['accuracy'])
 
+        
 
     def save_model(self, num=None):
         json_string = self.From_model.to_json()
