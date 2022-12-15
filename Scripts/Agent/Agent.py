@@ -142,7 +142,7 @@ class DQNAgent:
                 y_p_j[action_j_index[2]] = reward_j
             else:
                 # reward_j + gamma * max_action' Q(state', action')
-                print("reward:{}   des:{}   f:{}  t:{}  p:{}".format(reward_j,self.discount_factor,np.max(self.From_model_Q_values(state_j_1)),np.max(self.To_model_Q_values(state_j_1)) ,np.max(self.People_model_Q_values(state_j_1)) ))
+                #print("reward:{}   des:{}   f:{}  t:{}  p:{}".format(reward_j,self.discount_factor,np.max(self.From_model_Q_values(state_j_1)),np.max(self.To_model_Q_values(state_j_1)) ,np.max(self.People_model_Q_values(state_j_1)) ))
                 y_f_j[action_j_index[0]] = reward_j + self.discount_factor * np.max(self.From_model_Q_values(state_j_1))  # NOQA
                 y_t_j[action_j_index[1]] = reward_j + self.discount_factor * np.max(self.To_model_Q_values(state_j_1))  # NOQA
                 y_p_j[action_j_index[2]] = reward_j + self.discount_factor * np.max(self.People_model_Q_values(state_j_1))  # NOQA
@@ -153,14 +153,14 @@ class DQNAgent:
             y_p_minibatch.append(y_p_j)
 
         #print(type(self.From_model))
-        callbacks_From=tf.keras.callbacks.TensorBoard(log_dir=f_log)
-        callbacks_To=tf.keras.callbacks.TensorBoard(log_dir=f_log)
-        callbacks_People=tf.keras.callbacks.TensorBoard(log_dir=f_log)
+        callbacks_From=tf.keras.callbacks.TensorBoard(log_dir=f_log+'/From')
+        callbacks_To=tf.keras.callbacks.TensorBoard(log_dir=f_log+'/To')
+        callbacks_People=tf.keras.callbacks.TensorBoard(log_dir=f_log+'/People')
         
-        self.From_model.fit(np.array(state_minibatch), np.array(y_f_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=callbacks_From)
-        self.To_model.fit(np.array(state_minibatch), np.array(y_t_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=callbacks_To)
-        self.People_model.fit(np.array(state_minibatch), np.array(y_p_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=callbacks_People)
-        
+        self.From_model.fit(np.array(state_minibatch), np.array(y_f_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=[callbacks_From])
+        self.To_model.fit(np.array(state_minibatch), np.array(y_t_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=[callbacks_To])
+        self.People_model.fit(np.array(state_minibatch), np.array(y_p_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=[callbacks_People])
+
     def load_model(self, model_path=None):
 
         json_string = open(os.path.join(f_model, From_model_filename)).read()
