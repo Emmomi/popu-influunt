@@ -24,6 +24,7 @@ sys.path.append(os.pardir)
 import tensorflow as tf
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 f_log = 'Scripts/log'
 f_model = 'Scripts/models'
@@ -40,10 +41,10 @@ People_weights_filename = 'People_model_weights.hdf5'
 
 
 class DQNAgent:
-    def __init__(self,env_name,rooms):
+    def __init__(self,env_name,rooms,epoch):
         self.env_name=env_name
         self.name = os.path.splitext(os.path.basename(__file__))[0]
-        self.episode=1000
+        self.episode=epoch
         self.minibatch_size=32
         self.lerning_rate=0.001
         self.discount_factor=0.9
@@ -59,7 +60,7 @@ class DQNAgent:
         self.init_People_model(self.lerning_rate,rooms)
 
         self.current_loss=0.0
-    
+
     def init_From_model(self,rate,rooms):
         self.From_model = Sequential()
         self.From_model.add(InputLayer(input_shape=(rooms,3)))
@@ -157,9 +158,17 @@ class DQNAgent:
         callbacks_To=tf.keras.callbacks.TensorBoard(log_dir=f_log+'/To')
         callbacks_People=tf.keras.callbacks.TensorBoard(log_dir=f_log+'/People')
         
-        self.From_model.fit(np.array(state_minibatch), np.array(y_f_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=[callbacks_From])
-        self.To_model.fit(np.array(state_minibatch), np.array(y_t_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=[callbacks_To])
-        self.People_model.fit(np.array(state_minibatch), np.array(y_p_minibatch),epochs=1, batch_size=minibatch_size,verbose=0,callbacks=[callbacks_People])
+        history=self.From_model.fit(np.array(state_minibatch), np.array(y_f_minibatch),epochs=1, batch_size=minibatch_size,verbose=1,callbacks=[callbacks_From])
+        loss_f=history.history['loss']
+        acc_f=history.history['accuracy']
+        history=self.To_model.fit(np.array(state_minibatch), np.array(y_t_minibatch),epochs=1, batch_size=minibatch_size,verbose=1,callbacks=[callbacks_To])
+        loss_t=history.history['loss']
+        acc_t=history.history['accuracy']
+        history=self.People_model.fit(np.array(state_minibatch), np.array(y_p_minibatch),epochs=1, batch_size=minibatch_size,verbose=1,callbacks=[callbacks_People])
+        loss_p=history.history['loss']
+        acc_p=history.history['accuracy']
+
+        return acc_f[0],loss_f[0],acc_t[0],loss_t[0],acc_p[0],loss_p[0]
 
     def load_model(self, model_path=None):
 
