@@ -8,7 +8,7 @@ from env import env
 if __name__ == "__main__":
 
     e=0
-    epoch=3
+    epoch=500
 
     env=env.popu()
     #print(type(env.get_state()))
