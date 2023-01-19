@@ -5,11 +5,11 @@
         "limit_people":200
     },
     "room2":{
-        "current_people":320,
+        "current_people":300,
         "limit_people":300
     },
     "room3":{
-        "current_people":30,
+        "current_people":0,
         "limit_people":200
     }
 }

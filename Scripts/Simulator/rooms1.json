@@ -1,7 +1,7 @@
 {
     "number":3,
     "room1":{
-        "current_people":260,
+        "current_people":230,
         "limit_people":200
     },
     "room2":{
@@ -9,7 +9,7 @@
         "limit_people":300
     },
     "room3":{
-        "current_people":230,
-        "limit_people":400
+        "current_people":130,
+        "limit_people":200
     }
 }

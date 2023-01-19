@@ -33,9 +33,9 @@ class popu:
         if ex_rooms_after<ex_rooms_befor:
             self.reward=5
         elif ex_rooms_after==ex_rooms_befor:
-            self.reward=1
-        else:
             self.reward=-1
+        else:
+            self.reward=-5
 
         state=self.get_state()
         times_room=0
