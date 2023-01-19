@@ -9,7 +9,7 @@
         "limit_people":300
     },
     "room3":{
-        "current_people":320,
-        "limit_people":300
+        "current_people":220,
+        "limit_people":200
     }
 }

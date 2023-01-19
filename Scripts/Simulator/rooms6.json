@@ -1,15 +1,15 @@
 {
     "number":3,
     "room1":{
-        "current_people":100,
-        "limit_people":180
+        "current_people":10,
+        "limit_people":200
     },
     "room2":{
         "current_people":320,
-        "limit_people":330
+        "limit_people":300
     },
     "room3":{
-        "current_people":230,
-        "limit_people":210
+        "current_people":330,
+        "limit_people":200
     }
 }

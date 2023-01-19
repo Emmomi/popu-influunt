@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     env=env.popu()
     rooms=rooms=env.get_state().get_shape().as_list()[0]
-    agent=Agent.DQNAgent(env.name,rooms)
+    agent=Agent.DQNAgent(env.name,rooms,0)
     agent.load_model()
     people_late=np.arange(1,11)
 
