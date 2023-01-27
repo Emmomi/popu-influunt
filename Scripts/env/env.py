@@ -31,9 +31,9 @@ class popu:
         ex_rooms_after=self.check_ex_rooms(self.Simu)
         
         if ex_rooms_after<ex_rooms_befor:
-            self.reward=5
+            self.reward=5*(3-self.check_ex_rooms(self.Simu))
         elif ex_rooms_after==ex_rooms_befor:
-            self.reward=-1
+            self.reward=0
         else:
             self.reward=-5
 
@@ -56,7 +56,7 @@ class popu:
     def reset(self,mood=False):
         self.flag=False
         self.reward=0
-        #self.Simu=Simulator.Simulator('Scripts/Simulator/rooms.json')
+        #self.Simu=Simulator.Simulator('Scripts/Simulator/rooms1.json')
         #if mood:
         n=random.randint(1,10)
         self.Simu=Simulator.Simulator('Scripts/Simulator/rooms'+str(n)+'.json')
